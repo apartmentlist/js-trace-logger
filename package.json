@@ -1,6 +1,6 @@
 {
   "name": "@apartmentlist/js-trace-logger",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Logger outputs messages with Trace ID",
   "author": "Takashi Mizohata <tmizohata@apartmentlist.com>",
   "license": "Fair",
@@ -8,6 +8,7 @@
   "es2015": "esm2015/logger.js",
   "typings": "types/logger.d.ts",
   "scripts": {
+    "deploy": "npm publish --access restricted",
     "build": "npm run build:clean && npm run build:all",
     "build:clean": "rm -rf dist && mkdir dist",
     "build:all": "npm run build:cjs && npm run build:es2015 && npm run build:types",
@@ -15,8 +16,8 @@
     "build:es2015": "tsc --project tsconfig.esm2015.json",
     "build:types": "tsc --project tsconfig.types.json",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\"}' mocha --require ts-node/register 'test/**/*.test.ts'",
-    "postinstall": "mkdir -p './node_modules/@types/test-console' && cp ./dev_types/test-console.d.ts ./node_modules/@types/test-console/index.d.ts",
-    "postinstall-COMMENT": "echo 'This is a workaround for using 'test-console' for testing. Should find an alternative solution soon'"
+    "pretest": "rm -rf ./node_modules/@types/test-console && mkdir -p './node_modules/@types/test-console' && cp ./dev_types/test-console.d.ts ./node_modules/@types/test-console/index.d.ts",
+    "pretest-COMMENT": "echo 'This is a workaround for using 'test-console' for testing. Should find an alternative solution soon'"
   },
   "dependencies": {
     "dd-trace": "^0.24.0",
