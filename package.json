@@ -4,8 +4,8 @@
   "description": "Logger outputs messages with Trace ID",
   "author": "Takashi Mizohata <tmizohata@apartmentlist.com>",
   "license": "Fair",
-  "main": "src/logger",
-  "es2015": "esm2015/logger.js",
+  "main": "dist/cjs/logger",
+  "es2015": "dist/esm2015/logger.js",
   "typings": "types/logger.d.ts",
   "scripts": {
     "deploy": "npm publish --access restricted",
