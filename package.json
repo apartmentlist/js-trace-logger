@@ -1,20 +1,27 @@
 {
-  "name": "dd-trace-logger",
-  "version": "0.1.0",
-  "description": "",
-  "main": "src/logger",
-  "types": "src/logger.d.ts",
-  "scripts": {
-    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\"}' mocha --require ts-node/register 'test/**/*.test.ts'",
-    "postinstall": "mkdir -p './node_modules/@types/test-console' && cp ./dev_types/test-console.d.ts ./node_modules/@types/test-console/index.d.ts"
-  },
+  "name": "@apartmentlist/js-trace-logger",
+  "version": "0.1.1",
+  "description": "Logger outputs messages with Trace ID",
   "author": "Takashi Mizohata <tmizohata@apartmentlist.com>",
   "license": "Fair",
-  "private": true,
+  "main": "src/logger",
+  "es2015": "esm2015/logger.js",
+  "typings": "types/logger.d.ts",
+  "scripts": {
+    "build": "npm run build:clean && npm run build:all",
+    "build:clean": "rm -rf dist && mkdir dist",
+    "build:all": "npm run build:cjs && npm run build:es2015 && npm run build:types",
+    "build:cjs": "tsc --project tsconfig.cjs.json",
+    "build:es2015": "tsc --project tsconfig.esm2015.json",
+    "build:types": "tsc --project tsconfig.types.json",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\"}' mocha --require ts-node/register 'test/**/*.test.ts'",
+    "postinstall": "mkdir -p './node_modules/@types/test-console' && cp ./dev_types/test-console.d.ts ./node_modules/@types/test-console/index.d.ts",
+    "postinstall-COMMENT": "echo 'This is a workaround for using 'test-console' for testing. Should find an alternative solution soon'"
+  },
   "dependencies": {
     "dd-trace": "^0.24.0",
-    "stack-utils": "2.0.2",
-    "@types/stack-utils": "1.0.1"
+    "stack-utils": "^2.0.2",
+    "@types/stack-utils": "^1.0.1"
   },
   "devDependencies": {
     "opentracing": "0.14.4",
@@ -25,5 +32,8 @@
     "test-console": "1.1.0",
     "@types/mocha": "8.0.3",
     "@types/node": "14.6.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/@apartmentlist"
   }
 }

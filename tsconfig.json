@@ -1,21 +1,22 @@
 {
   "compilerOptions": {
-    "allowJs": false,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "lib": ["dom", "dom.iterable", "esnext", "scripthost"],
     "module": "commonjs",
     "moduleResolution": "node",
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "outDir": "dist",
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
+    "target": "es2018",
+    "lib": ["es2018"],
+    "outDir": "./dist/dev",
+    "rootDir": "./src",
     "strict": false,
+    "sourceMap": false,
+    "removeComments": false,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": false,
     "strictBindCallApply": true,
-    "strictNullChecks": true,
-    "target": "es2017"
+    "strictNullChecks": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["./test/", "./node_modules/", "./dist/"]
+  "exclude": ["**/*.test.ts", "test/**", "node_modules", "dist"]
 }
