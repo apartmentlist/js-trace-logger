@@ -1,0 +1,29 @@
+{
+  "name": "dd-trace-logger",
+  "version": "0.1.0",
+  "description": "",
+  "main": "src/logger",
+  "types": "src/logger.d.ts",
+  "scripts": {
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\"}' mocha --require ts-node/register 'test/**/*.test.ts'",
+    "postinstall": "mkdir -p './node_modules/@types/test-console' && cp ./dev_types/test-console.d.ts ./node_modules/@types/test-console/index.d.ts"
+  },
+  "author": "Takashi Mizohata <tmizohata@apartmentlist.com>",
+  "license": "Fair",
+  "private": true,
+  "dependencies": {
+    "dd-trace": "^0.24.0",
+    "stack-utils": "2.0.2",
+    "@types/stack-utils": "1.0.1"
+  },
+  "devDependencies": {
+    "opentracing": "0.14.4",
+    "mocha": "8.1.1",
+    "typescript": "3.9.7",
+    "ts-node": "8.10.2",
+    "tsunit.external": "2.1.1",
+    "test-console": "1.1.0",
+    "@types/mocha": "8.0.3",
+    "@types/node": "14.6.0"
+  }
+}
