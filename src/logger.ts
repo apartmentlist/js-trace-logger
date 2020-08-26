@@ -27,6 +27,8 @@ interface ExtraProperty {
 }
 
 export default class Logger {
+  public static passThru: boolean = false;
+
   private static logQueue: Array<LogQueue> = [];
   private static formatter: LogFormatter;
   private static stackUtil: StackUtils = new StackUtils({
@@ -42,16 +44,16 @@ export default class Logger {
     Logger.processQueuedMessages();
   }
 
-  static debug(msg: any): void {
+  static debug(...msg: any): void {
     Logger.write('debug', msg);
   }
-  static info(msg: any): void {
+  static info(...msg: any): void {
     Logger.write('info', msg);
   }
-  static warn(msg: any): void {
+  static warn(...msg: any): void {
     Logger.write('warn', msg);
   }
-  static error(msg: any): void {
+  static error(...msg: any): void {
     Logger.write('error', msg);
   }
 
@@ -78,7 +80,12 @@ export default class Logger {
   // PRIVATE
   // =======
 
-  private static write(sev: LoggerSeverityStrings, msg: any) {
+  private static write(sev: LoggerSeverityStrings, msg: Array<any>) {
+    if (Logger.passThru) {
+      const arg: Array<any> = [`[${sev}]`].concat(msg);
+      console.log.apply(console, arg);
+      return;
+    }
     const dt: Date = new Date();
     const m: string = Logger.handleMessage(msg);
 
@@ -93,21 +100,47 @@ export default class Logger {
     }
   }
 
-  private static handleMessage(msg: any): string {
-    if (msg && typeof msg.toJSON === 'function') {
-      return msg.toJSON();
+  private static handleMessage(_msg: Array<any> | null): string {
+    let msg: any;
+
+    if (_msg === null || _msg === undefined) {
+      msg = _msg;
+    } else if (_msg.length && _msg.length === 1) {
+      msg = _msg[0];
+    } else {
+      msg = _msg;
     }
+
     if (msg instanceof Error) {
       return JSON.stringify(Logger.convertErrorToJson(msg));
+    }
+    if (Array.isArray(msg) && msg[0] instanceof Error) {
+      let arg;
+      if (msg.length === 2) {
+        arg = msg[1];
+      } else {
+        arg = msg.slice(1);
+      }
+      return JSON.stringify(Logger.convertErrorToJson(msg[0], arg));
+    }
+    if (msg && typeof msg.toJSON === 'function') {
+      return msg.toJSON();
     }
     const msgType: string = typeof msg;
     // handle premitive types
     switch (msgType) {
       case 'bigint':
-      case 'boolean':
       case 'function':
-      case 'number':
       case 'string':
+        return msg.toString();
+        break;
+
+      case 'boolean':
+      case 'number':
+        // these still should be string because:
+        // 1) TypeScript type suggests,
+        // 2) also you want it to keep its type when
+        //    it goes as JSON-string, which it will be.
         return msg.toString();
         break;
 

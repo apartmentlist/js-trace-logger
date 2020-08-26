@@ -40,3 +40,8 @@ export const stubTracerWithoutContext = function (): Tracer {
   };
   return tracer;
 };
+
+const REGEX_ES = /\x1B(?:[@-Z\\-_]|\[[0-\?]*[ -\/]*[\@-~])/g;
+export const cleanupConsoleEscapeSequence = function (str: string): string {
+  return str.replace(REGEX_ES, '');
+};
