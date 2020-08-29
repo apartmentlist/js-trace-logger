@@ -1,6 +1,5 @@
 import { Tracer } from 'dd-trace';
-import { LoggerSeverity } from './constant';
-declare type LoggerSeverityStrings = keyof typeof LoggerSeverity;
+import { LoggerSeverityString } from './constant';
 export default class LogFormatter {
     env: string;
     service: string;
@@ -10,8 +9,7 @@ export default class LogFormatter {
     private templateFunc;
     private traceFunc;
     constructor(trc: Tracer, env: string, srv: string, vrs: string, tpl?: string);
-    format(dt: Date, sev: LoggerSeverityStrings, msg: string): string;
+    format(dt: Date, sev: LoggerSeverityString, msg: string): string;
     private toTraceString;
     private convertDateForDatadog;
 }
-export {};

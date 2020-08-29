@@ -1,13 +1,11 @@
 import { Tracer } from 'dd-trace';
 import StackUtils from 'stack-utils';
 import LogFormatter from './log_formatter';
-import { LoggerSeverity } from './constant';
-
-type LoggerSeverityStrings = keyof typeof LoggerSeverity;
+import { LoggerSeverityString, LoggerSeverityRuntimeOption, LoggerSeverityIndex } from './constant';
 
 interface LogQueue {
   datetime: Date;
-  severity: LoggerSeverityStrings;
+  severity: LoggerSeverityString;
   msg: any;
 }
 
@@ -26,6 +24,8 @@ interface ExtraProperty {
   [key: string]: any;
 }
 
+const LoggerDefaultSeverity: LoggerSeverityString = 'info';
+
 export default class Logger {
   public static passThru: boolean = false;
 
@@ -35,6 +35,26 @@ export default class Logger {
     cwd: process.cwd(),
     internals: StackUtils.nodeInternals(),
   });
+  private static severityIndex: number = LoggerSeverityIndex[LoggerDefaultSeverity];
+  private static _level: LoggerSeverityString = LoggerDefaultSeverity;
+
+  static get level(): LoggerSeverityString {
+    return Logger._level;
+  }
+
+  static set level(l: LoggerSeverityString) {
+    const key: LoggerSeverityString = LoggerSeverityRuntimeOption[l];
+    if (key) {
+      Logger._level = key;
+      Logger.severityIndex = LoggerSeverityIndex[key];
+    } else {
+      throw new TypeError(
+        `invalid argument: Logger.level should be one of ${JSON.stringify(
+          Object.values(LoggerSeverityRuntimeOption)
+        )} but got "${l}"`
+      );
+    }
+  }
 
   static boot(tracer: Tracer, env: string, srv: string, vrs: string) {
     // `Logger.info()` and other methods should still work
@@ -80,12 +100,17 @@ export default class Logger {
   // PRIVATE
   // =======
 
-  private static write(sev: LoggerSeverityStrings, msg: Array<any>) {
+  private static write(sev: LoggerSeverityString, msg: Array<any>) {
+    const messageSevIndex = LoggerSeverityIndex[sev];
+    if (Logger.severityIndex < messageSevIndex) {
+      return;
+    }
     if (Logger.passThru) {
       const arg: Array<any> = [`[${sev}]`].concat(msg);
       console.log.apply(console, arg);
       return;
     }
+
     const dt: Date = new Date();
     const m: string = Logger.handleMessage(msg);
 
@@ -176,7 +201,7 @@ export default class Logger {
     Logger.logQueue = [];
   }
 
-  private static concreteWrite(dt: Date, sev: LoggerSeverityStrings, msg: string) {
+  private static concreteWrite(dt: Date, sev: LoggerSeverityString, msg: string) {
     // if you ever need to write it to a FD,
     // consider using this:
     // https://www.npmjs.com/package/sonic-boom

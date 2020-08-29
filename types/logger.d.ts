@@ -1,4 +1,5 @@
 import { Tracer } from 'dd-trace';
+import { LoggerSeverityString } from './constant';
 interface LoggingError {
     error: ErrorObject;
     [key: string]: any;
@@ -16,6 +17,10 @@ export default class Logger {
     private static logQueue;
     private static formatter;
     private static stackUtil;
+    private static severityIndex;
+    private static _level;
+    static get level(): LoggerSeverityString;
+    static set level(l: LoggerSeverityString);
     static boot(tracer: Tracer, env: string, srv: string, vrs: string): void;
     static debug(...msg: any): void;
     static info(...msg: any): void;

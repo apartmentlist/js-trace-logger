@@ -1,6 +1,6 @@
 {
   "name": "@apartmentlist/js-trace-logger",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Logger outputs messages with Trace ID",
   "author": "Takashi Mizohata <tmizohata@apartmentlist.com>",
   "license": "Fair",

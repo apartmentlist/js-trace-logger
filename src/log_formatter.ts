@@ -1,8 +1,6 @@
 import { Tracer, Span, SpanContext } from 'dd-trace';
 import { compileTemplate } from './util';
-import { LoggerSeverity } from './constant';
-
-type LoggerSeverityStrings = keyof typeof LoggerSeverity;
+import { LoggerSeverity, LoggerSeverityString } from './constant';
 
 export default class LogFormatter {
   public env: string = 'development';
@@ -30,7 +28,7 @@ export default class LogFormatter {
     }
   }
 
-  public format(dt: Date, sev: LoggerSeverityStrings, msg: string): string {
+  public format(dt: Date, sev: LoggerSeverityString, msg: string): string {
     return this.templateFunc({
       datetime: this.convertDateForDatadog(dt),
       service: this.service,

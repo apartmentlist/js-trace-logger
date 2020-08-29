@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import * as TestConsole from 'test-console';
 import { stubTracerWithoutContext, cleanupConsoleEscapeSequence } from './test_util';
+import { LoggerSeverityIndex } from '../src/constant';
 
 import Logger from '../src/logger';
 
@@ -15,8 +16,18 @@ describe('Logger', () => {
     Logger.boot(tracer, TEST_ENV, TEST_SRV, TEST_VRS);
   });
 
+  let originalLoggerLevel;
+  beforeEach(() => {
+    originalLoggerLevel = Logger.level;
+  });
+
+  afterEach(() => {
+    Logger.level = originalLoggerLevel;
+  });
+
   describe('debug|info|warn|error', () => {
     it('accepts multiple args for passThru output', () => {
+      Logger.level = 'debug';
       Logger.passThru = true;
       const output = stdout.inspectSync(() => {
         Logger.debug(1, 'this', true, ['foo'], { bar: 'baz' });
@@ -71,6 +82,7 @@ describe('Logger', () => {
     });
 
     it('pass through message directly to console', () => {
+      Logger.level = 'debug';
       const output = stdout.inspectSync(() => {
         Logger.debug('hi');
         Logger.info('this');
@@ -82,6 +94,89 @@ describe('Logger', () => {
 
     after(() => {
       Logger.passThru = false;
+    });
+  });
+
+  describe('level', () => {
+    it('sets severity level', () => {
+      Logger.level = 'debug';
+      assert.strictEqual((<any>Logger).severityIndex, LoggerSeverityIndex.debug);
+      Logger.level = 'info';
+      assert.strictEqual((<any>Logger).severityIndex, LoggerSeverityIndex.info);
+      Logger.level = 'warn';
+      assert.strictEqual((<any>Logger).severityIndex, LoggerSeverityIndex.warn);
+      Logger.level = 'error';
+      assert.strictEqual((<any>Logger).severityIndex, LoggerSeverityIndex.error);
+    });
+
+    it('runs with debug level', () => {
+      Logger.level = 'debug';
+      Logger.passThru = true;
+      const output = stdout.inspectSync(() => {
+        Logger.debug('hi');
+        Logger.info('hi');
+        Logger.warn('hi');
+        Logger.error('hi');
+      });
+      Logger.passThru = false;
+      assert.strictEqual(output.length, 4);
+      ['debug', 'info', 'warn', 'error'].forEach((key, idx) => {
+        assert.strictEqual(cleanupConsoleEscapeSequence(output[idx]), `[${key}] hi\n`);
+      });
+    });
+
+    it('runs with info level', () => {
+      Logger.level = 'info';
+      Logger.passThru = true;
+      const output = stdout.inspectSync(() => {
+        Logger.debug('hi');
+        Logger.info('hi');
+        Logger.warn('hi');
+        Logger.error('hi');
+      });
+      Logger.passThru = false;
+      assert.strictEqual(output.length, 3);
+      ['info', 'warn', 'error'].forEach((key, idx) => {
+        assert.strictEqual(cleanupConsoleEscapeSequence(output[idx]), `[${key}] hi\n`);
+      });
+    });
+
+    it('runs with warn level', () => {
+      Logger.level = 'warn';
+      Logger.passThru = true;
+      const output = stdout.inspectSync(() => {
+        Logger.debug('hi');
+        Logger.info('hi');
+        Logger.warn('hi');
+        Logger.error('hi');
+      });
+      Logger.passThru = false;
+      assert.strictEqual(output.length, 2);
+      ['warn', 'error'].forEach((key, idx) => {
+        assert.strictEqual(cleanupConsoleEscapeSequence(output[idx]), `[${key}] hi\n`);
+      });
+    });
+
+    it('runs with error level', () => {
+      Logger.level = 'error';
+      Logger.passThru = true;
+      const output = stdout.inspectSync(() => {
+        Logger.debug('hi');
+        Logger.info('hi');
+        Logger.warn('hi');
+        Logger.error('hi');
+      });
+      Logger.passThru = false;
+      assert.strictEqual(output.length, 1);
+      ['error'].forEach((key, idx) => {
+        assert.strictEqual(cleanupConsoleEscapeSequence(output[idx]), `[${key}] hi\n`);
+      });
+    });
+
+    it('fails when non-valid value is assigned', () => {
+      assert.throws(() => {
+        (<any>Logger).level = 0;
+      });
     });
   });
 
