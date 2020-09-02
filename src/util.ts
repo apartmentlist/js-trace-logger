@@ -1,10 +1,10 @@
-interface TemplateParam {
+export interface TemplateParam {
   [key: string]: string;
 }
 
-export const compileTemplate = function (str: string): Function {
+export const compileTemplate = function (str: string): (passed: TemplateParam) => string {
   const definedParams: Array<string> = extractParams(str);
-  const func: Function = new Function(...definedParams, ['return `', str, '`;'].join(''));
+  const func = new Function(...definedParams, ['return `', str, '`;'].join(''));
   return function (passed: TemplateParam): string {
     const passedParams: Array<string> = [];
     definedParams.forEach((definedKey) => {
@@ -21,7 +21,7 @@ export const compileTemplate = function (str: string): Function {
 export const extractParams = function (str: string): Array<string> {
   // The following regex is not comprehensive
   // but I think it's enough for now?
-  const reg: RegExp = /\$\{(\w+)\}/g;
+  const reg = /\$\{(\w+)\}/g;
   const params: Array<string> = [];
   let matches: RegExpExecArray | null;
   while ((matches = reg.exec(str))) {

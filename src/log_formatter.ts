@@ -1,16 +1,16 @@
 import { Tracer, Span, SpanContext } from 'dd-trace';
-import { compileTemplate } from './util';
+import { TemplateParam, compileTemplate } from './util';
 import { LoggerSeverity, LoggerSeverityString } from './constant';
 
 export default class LogFormatter {
-  public env: string = 'development';
-  public service: string = 'logger';
-  public version: string = 'unknown';
+  public env = 'development';
+  public service = 'logger';
+  public version = 'unknown';
 
   private tracer: Tracer;
-  private template: string = '[${datetime}][${service}][${severity}][${trace}] ${msg}';
-  private templateFunc: Function;
-  private traceFunc: Function = compileTemplate(
+  private template = '[${datetime}][${service}][${severity}][${trace}] ${msg}';
+  private templateFunc: (passed: TemplateParam) => string;
+  private traceFunc: (passed: TemplateParam) => string = compileTemplate(
     'dd.env=${env} dd.service=${service} dd.version=${version} dd.trace_id=${trace_id} dd.span_id=${span_id}'
   );
 
@@ -40,8 +40,8 @@ export default class LogFormatter {
 
   private toTraceString(): string {
     const activeSpan: Span | null = this.tracer.scope().active();
-    let trace_id: string = '1';
-    let span_id: string = '1';
+    let trace_id = '1';
+    let span_id = '1';
 
     if (activeSpan) {
       const context: SpanContext = activeSpan.context();

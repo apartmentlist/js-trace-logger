@@ -27,7 +27,7 @@ interface ExtraProperty {
 const LoggerDefaultSeverity: LoggerSeverityString = 'info';
 
 export default class Logger {
-  public static passThru: boolean = false;
+  public static passThru = false;
 
   private static logQueue: Array<LogQueue> = [];
   private static formatter: LogFormatter;
@@ -56,7 +56,7 @@ export default class Logger {
     }
   }
 
-  static boot(tracer: Tracer, env: string, srv: string, vrs: string) {
+  static boot(tracer: Tracer, env: string, srv: string, vrs: string): void {
     // `Logger.info()` and other methods should still work
     // before `boot()` but it'll start to really writ after
     // DDTrace.Tracer gets properly initilized.
@@ -64,16 +64,16 @@ export default class Logger {
     Logger.processQueuedMessages();
   }
 
-  static debug(...msg: any): void {
+  static debug(...msg: Array<any>): void {
     Logger.write('debug', msg);
   }
-  static info(...msg: any): void {
+  static info(...msg: Array<any>): void {
     Logger.write('info', msg);
   }
-  static warn(...msg: any): void {
+  static warn(...msg: Array<any>): void {
     Logger.write('warn', msg);
   }
-  static error(...msg: any): void {
+  static error(...msg: Array<any>): void {
     Logger.write('error', msg);
   }
 
@@ -107,7 +107,7 @@ export default class Logger {
     }
     if (Logger.passThru) {
       const arg: Array<any> = [`[${sev}]`].concat(msg);
-      console.log.apply(console, arg);
+      console.log.call(console, ...arg);
       return;
     }
 
