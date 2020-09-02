@@ -16,9 +16,7 @@
     "build:cjs": "tsc --project tsconfig.cjs.json",
     "build:es2015": "tsc --project tsconfig.esm2015.json",
     "build:types": "tsc --project tsconfig.types.json",
-    "test": "CHOMA_SEED=$(date +%s) TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\"}' mocha --require ts-node/register --require choma 'test/**/*.test.ts'",
-    "pretest": "rm -rf ./node_modules/@types/test-console && mkdir -p './node_modules/@types/test-console' && cp ./dev_types/test-console.d.ts ./node_modules/@types/test-console/index.d.ts",
-    "pretest-COMMENT": "echo 'This is a workaround for using 'test-console' for testing. Should find an alternative solution soon'"
+    "test": "CHOMA_SEED=$(date +%s) TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\"}' mocha --require ts-node/register --require choma 'test/**/*.test.ts'"
   },
   "dependencies": {
     "dd-trace": "^0.24.0",
@@ -32,7 +30,6 @@
     "typescript": "3.9.7",
     "ts-node": "8.10.2",
     "tsunit.external": "2.1.1",
-    "test-console": "1.1.0",
     "@types/mocha": "8.0.3",
     "@types/node": "14.6.0"
   },

@@ -1,11 +1,9 @@
 import * as assert from 'assert';
-import * as TestConsole from 'test-console';
-import { stubTracerWithoutContext, cleanupConsoleEscapeSequence } from './test_util';
+import { stubTracerWithoutContext, cleanupConsoleEscapeSequence, inspectStdOutSync } from './test_util';
 import { LoggerSeverityIndex } from '../src/constant';
 
 import Logger from '../src/logger';
 
-const stdout = TestConsole.stdout;
 const TEST_ENV = 'testing';
 const TEST_SRV = 'logger';
 const TEST_VRS = '0x00001';
@@ -29,7 +27,8 @@ describe('Logger', () => {
     it('accepts multiple args for passThru output', () => {
       Logger.level = 'debug';
       Logger.passThru = true;
-      const output = stdout.inspectSync(() => {
+      // const output = stdout.inspectSync(() => {
+      const output = inspectStdOutSync(() => {
         Logger.debug(1, 'this', true, ['foo'], { bar: 'baz' });
         Logger.info(1, 'this', true, ['foo'], { bar: 'baz' });
         Logger.warn(1, 'this', true, ['foo'], { bar: 'baz' });
@@ -83,7 +82,7 @@ describe('Logger', () => {
 
     it('pass through message directly to console', () => {
       Logger.level = 'debug';
-      const output = stdout.inspectSync(() => {
+      const output = inspectStdOutSync(() => {
         Logger.debug('hi');
         Logger.info('this');
         Logger.warn('is');
@@ -112,7 +111,7 @@ describe('Logger', () => {
     it('runs with debug level', () => {
       Logger.level = 'debug';
       Logger.passThru = true;
-      const output = stdout.inspectSync(() => {
+      const output = inspectStdOutSync(() => {
         Logger.debug('hi');
         Logger.info('hi');
         Logger.warn('hi');
@@ -128,7 +127,7 @@ describe('Logger', () => {
     it('runs with info level', () => {
       Logger.level = 'info';
       Logger.passThru = true;
-      const output = stdout.inspectSync(() => {
+      const output = inspectStdOutSync(() => {
         Logger.debug('hi');
         Logger.info('hi');
         Logger.warn('hi');
@@ -144,7 +143,7 @@ describe('Logger', () => {
     it('runs with warn level', () => {
       Logger.level = 'warn';
       Logger.passThru = true;
-      const output = stdout.inspectSync(() => {
+      const output = inspectStdOutSync(() => {
         Logger.debug('hi');
         Logger.info('hi');
         Logger.warn('hi');
@@ -160,7 +159,7 @@ describe('Logger', () => {
     it('runs with error level', () => {
       Logger.level = 'error';
       Logger.passThru = true;
-      const output = stdout.inspectSync(() => {
+      const output = inspectStdOutSync(() => {
         Logger.debug('hi');
         Logger.info('hi');
         Logger.warn('hi');
@@ -310,7 +309,7 @@ describe('Logger', () => {
         severity: 'debug',
         msg: 'debug1',
       });
-      const output = stdout.inspectSync(() => {
+      const output = inspectStdOutSync(() => {
         (<any>Logger)['processQueuedMessages']();
       });
       assert.deepEqual(output, [
@@ -322,7 +321,7 @@ describe('Logger', () => {
 
   describe('_concreteWrite', () => {
     it('writes a message as a single argument', () => {
-      const output = stdout.inspectSync(() => {
+      const output = inspectStdOutSync(() => {
         const d = new Date(0);
         (<any>Logger)['concreteWrite'](d, 'debug', 'debug');
         (<any>Logger)['concreteWrite'](d, 'info', 'info');
