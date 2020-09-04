@@ -1,15 +1,25 @@
 import { Tracer } from 'dd-trace';
 import { LoggerSeverityString } from './constant';
-export default class LogFormatter {
+interface LogFormatterOption {
     env: string;
     service: string;
     version: string;
+    progname: string;
+    logTemplate: string;
+    traceTemplate: string;
+    dateFunc: (d: Date) => string;
+}
+export default class LogFormatter {
     private tracer;
-    private template;
-    private templateFunc;
+    private env;
+    private service;
+    private version;
+    private progname;
+    private logFunc;
     private traceFunc;
-    constructor(trc: Tracer, env: string, srv: string, vrs: string, tpl?: string);
+    private dateFunc;
+    constructor(tracer: Tracer, option: LogFormatterOption);
     format(dt: Date, sev: LoggerSeverityString, msg: string): string;
     private toTraceString;
-    private convertDateForDatadog;
 }
+export {};

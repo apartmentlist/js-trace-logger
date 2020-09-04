@@ -29,3 +29,14 @@ export const extractParams = function (str: string): Array<string> {
   }
   return params;
 };
+
+export const formatUTCDateRuby = function (d: Date): string {
+  // '2020-05-13 18:01:16 +0000'
+  const year = d.getUTCFullYear();
+  const month = `0${d.getUTCMonth() + 1}`.slice(-2);
+  const day = `0${d.getUTCDate()}`.slice(-2);
+  const hour = `0${d.getUTCHours()}`.slice(-2);
+  const minutes = `0${d.getUTCMinutes()}`.slice(-2);
+  const seconds = `0${d.getUTCSeconds()}`.slice(-2);
+  return `${year}-${month}-${day} ${hour}:${minutes}:${seconds} +0000`;
+};

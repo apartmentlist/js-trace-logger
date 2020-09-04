@@ -1,6 +1,6 @@
 {
   "name": "@apartmentlist/js-trace-logger",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "Logger outputs messages with Trace ID",
   "author": "Takashi Mizohata <tmizohata@apartmentlist.com>",
   "license": "Fair",
@@ -20,13 +20,13 @@
     "test": "CHOMA_SEED=$(date +%s) TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\"}' mocha --require ts-node/register --require choma 'test/**/*.test.ts'"
   },
   "dependencies": {
-    "dd-trace": "^0.24.0",
-    "stack-utils": "^2.0.2",
-    "@types/stack-utils": "^1.0.1"
+    "@types/stack-utils": "^1.0.1",
+    "dd-trace": "^0.24.2",
+    "stack-utils": "^2.0.2"
   },
   "devDependencies": {
     "@types/mocha": "^8.0.3",
-    "@types/node": "^14.6.0",
+    "@types/node": "^14.6.4",
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.1",
     "choma": "^1.2.1",
@@ -36,7 +36,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "mocha": "^8.1.1",
+    "mocha": "^8.1.3",
     "opentracing": "^0.14.4",
     "ts-node": "^8.10.2",
     "tsunit.external": "^2.1.1",

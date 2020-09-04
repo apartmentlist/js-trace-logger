@@ -2,36 +2,42 @@ import { Tracer, Span, SpanContext } from 'dd-trace';
 import { TemplateParam, compileTemplate } from './util';
 import { LoggerSeverity, LoggerSeverityString } from './constant';
 
+interface LogFormatterOption {
+  env: string;
+  service: string;
+  version: string;
+  progname: string;
+  logTemplate: string;
+  traceTemplate: string;
+  dateFunc: (d: Date) => string;
+}
+
 export default class LogFormatter {
-  public env = 'development';
-  public service = 'logger';
-  public version = 'unknown';
-
   private tracer: Tracer;
-  private template = '[${datetime}][${service}][${severity}][${trace}] ${msg}';
-  private templateFunc: (passed: TemplateParam) => string;
-  private traceFunc: (passed: TemplateParam) => string = compileTemplate(
-    'dd.env=${env} dd.service=${service} dd.version=${version} dd.trace_id=${trace_id} dd.span_id=${span_id}'
-  );
+  private env;
+  private service;
+  private version;
+  private progname;
+  private logFunc: (passed: TemplateParam) => string;
+  private traceFunc: (passed: TemplateParam) => string;
+  private dateFunc: (d: Date) => string;
 
-  constructor(trc: Tracer, env: string, srv: string, vrs: string, tpl?: string) {
-    this.tracer = trc;
+  constructor(tracer: Tracer, option: LogFormatterOption) {
+    this.tracer = tracer;
+    const { env, service, version, progname, logTemplate, traceTemplate, dateFunc } = option;
     this.env = env;
-    this.service = srv;
-    this.version = vrs;
-
-    if (tpl) {
-      this.template = tpl;
-      this.templateFunc = compileTemplate(tpl);
-    } else {
-      this.templateFunc = compileTemplate(this.template);
-    }
+    this.service = service;
+    this.version = version;
+    this.progname = progname;
+    this.logFunc = compileTemplate(logTemplate);
+    this.traceFunc = compileTemplate(traceTemplate);
+    this.dateFunc = dateFunc;
   }
 
   public format(dt: Date, sev: LoggerSeverityString, msg: string): string {
-    return this.templateFunc({
-      datetime: this.convertDateForDatadog(dt),
-      service: this.service,
+    return this.logFunc({
+      datetime: this.dateFunc(dt),
+      progname: this.progname,
       severity: LoggerSeverity[sev],
       trace: this.toTraceString(),
       msg: msg,
@@ -55,16 +61,5 @@ export default class LogFormatter {
       trace_id: trace_id,
       span_id: span_id,
     });
-  }
-
-  private convertDateForDatadog(d: Date): string {
-    // '2020-05-13 18:01:16 +0000'
-    const year = d.getUTCFullYear();
-    const month = `0${d.getUTCMonth() + 1}`.slice(-2);
-    const day = `0${d.getUTCDate()}`.slice(-2);
-    const hour = `0${d.getUTCHours()}`.slice(-2);
-    const minutes = `0${d.getUTCMinutes()}`.slice(-2);
-    const seconds = `0${d.getUTCSeconds()}`.slice(-2);
-    return `${year}-${month}-${day} ${hour}:${minutes}:${seconds} +0000`;
   }
 }
