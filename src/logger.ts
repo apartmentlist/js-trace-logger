@@ -2,6 +2,7 @@ import { Tracer } from 'dd-trace';
 import StackUtils from 'stack-utils';
 import LogFormatter from './log_formatter';
 import { LoggerSeverityString, LoggerSeverityRuntimeOption, LoggerSeverityIndex } from './constant';
+import { formatUTCDateRuby } from './util';
 
 interface LogQueue {
   datetime: Date;
@@ -24,24 +25,75 @@ interface ExtraProperty {
   [key: string]: any;
 }
 
+interface LoggerOption {
+  env: string;
+  service: string;
+  version: string;
+  progname?: string;
+  logTemplate?: string;
+  traceTemplate?: string;
+  dateFunc?: (d: Date) => string;
+}
+
 const LoggerDefaultSeverity: LoggerSeverityString = 'info';
 
 export default class Logger {
+  /**
+   * Skip TraceID decoration, if it's true
+   */
   public static passThru = false;
 
-  private static logQueue: Array<LogQueue> = [];
+  // See GETTER / SETTER section for underscore private properties
+  private static _dateFunc: (d: Date) => string = formatUTCDateRuby;
+  private static _env = 'development';
+  private static _level: LoggerSeverityString = LoggerDefaultSeverity;
+  private static _logTemplate = '[${datetime}][${progname}][${severity}][${trace}] ${msg}';
+  private static _progname = 'logger';
+  private static _service = 'logger';
+  private static _tracer: Tracer;
+  private static _traceTemplate =
+    'dd.env=${env} dd.service=${service} dd.version=${version} dd.trace_id=${trace_id} dd.span_id=${span_id}';
+  private static _version = 'unknown';
+
   private static formatter: LogFormatter;
+  private static logQueue: Array<LogQueue> = [];
+  private static severityIndex: number = LoggerSeverityIndex[LoggerDefaultSeverity];
   private static stackUtil: StackUtils = new StackUtils({
     cwd: process.cwd(),
     internals: StackUtils.nodeInternals(),
   });
-  private static severityIndex: number = LoggerSeverityIndex[LoggerDefaultSeverity];
-  private static _level: LoggerSeverityString = LoggerDefaultSeverity;
 
+  // GETTER / SETTER
+  // ===============
+
+  /**
+   * function to generate a string out of Date object
+   */
+  static get dateFunc(): (d: Date) => string {
+    return Logger._dateFunc;
+  }
+  static set dateFunc(func: (d: Date) => string) {
+    Logger._dateFunc = func;
+    Logger.updateFormatter();
+  }
+
+  /**
+   * DD_ENV
+   */
+  static get env(): string {
+    return Logger._env;
+  }
+  static set env(str: string) {
+    Logger._env = str;
+    Logger.updateFormatter();
+  }
+
+  /**
+   * LOG_LEVEL
+   */
   static get level(): LoggerSeverityString {
     return Logger._level;
   }
-
   static set level(l: LoggerSeverityString) {
     const key: LoggerSeverityString = LoggerSeverityRuntimeOption[l];
     if (key) {
@@ -56,26 +108,164 @@ export default class Logger {
     }
   }
 
-  static boot(tracer: Tracer, env: string, srv: string, vrs: string): void {
+  /**
+   * template to generate a whole log line
+   */
+  static get logTemplate(): string {
+    return Logger._logTemplate;
+  }
+  static set logTemplate(str: string) {
+    Logger._logTemplate = str;
+    Logger.updateFormatter();
+  }
+
+  /**
+   * progname ~= DD_SERVICE; unless you set it specifically
+   */
+  static get progname(): string {
+    return Logger._progname;
+  }
+  static set progname(str: string) {
+    Logger._progname = str;
+    Logger.updateFormatter();
+  }
+
+  /**
+   * DD_SERVICE
+   */
+  static get service(): string {
+    return Logger._service;
+  }
+  static set service(str: string) {
+    Logger._service = str;
+    Logger.updateFormatter();
+  }
+
+  /**
+   * Curently only Datadog Tracer
+   */
+  static get tracer(): Tracer {
+    return Logger._tracer;
+  }
+  static set tracer(tracer: Tracer) {
+    Logger._tracer = tracer;
+    Logger.updateFormatter();
+  }
+
+  /**
+   * template to generate dd_trace string
+   */
+  static get traceTemplate(): string {
+    return Logger._traceTemplate;
+  }
+  static set traceTemplate(str: string) {
+    Logger._traceTemplate = str;
+    Logger.updateFormatter();
+  }
+
+  /**
+   * DD_VERSION
+   */
+  static get version(): string {
+    return Logger._version;
+  }
+  static set version(str: string) {
+    Logger._version = str;
+    Logger.updateFormatter();
+  }
+
+  // PUBLIC methods
+  // ==============
+
+  /**
+   * Start to output log after boot()
+   */
+  static boot(tracer: Tracer, option: LoggerOption): void {
     // `Logger.info()` and other methods should still work
     // before `boot()` but it'll start to really writ after
     // DDTrace.Tracer gets properly initilized.
-    Logger.formatter = new LogFormatter(tracer, env, srv, vrs);
+    Logger._tracer = tracer;
+    const { env, service, version, progname, logTemplate, traceTemplate, dateFunc } = option;
+    Logger._env = env;
+    Logger._service = service;
+    Logger._version = version;
+    Logger._progname = progname ? progname : service;
+    if (logTemplate) {
+      Logger._logTemplate = logTemplate;
+    }
+    if (traceTemplate) {
+      Logger._traceTemplate = traceTemplate;
+    }
+    if (dateFunc) {
+      Logger._dateFunc = dateFunc;
+    }
+    Logger.updateFormatter();
     Logger.processQueuedMessages();
   }
 
+  /**
+   * console.log() compatible, but decorated with Trace ID and
+   * Serverity of DEBUG.
+   *
+   * Any object is accepted as msg, and it will try to make JSON
+   * string out of it. If the first agument is an instance of Error,
+   * it will try to create error construct.
+   *
+   * @param ...msg - Any message
+   */
   static debug(...msg: Array<any>): void {
     Logger.write('debug', msg);
   }
+
+  /**
+   * console.log() compatible, but decorated with Trace ID and
+   * Serverity of INFO.
+   *
+   * Any object is accepted as msg, and it will try to make JSON
+   * string out of it. If the first agument is an instance of Error,
+   * it will try to create error construct.
+   *
+   * @param ...msg - Any message
+   */
   static info(...msg: Array<any>): void {
     Logger.write('info', msg);
   }
+
+  /**
+   * console.log() compatible, but decorated with Trace ID and
+   * Serverity of WARNING.
+   *
+   * Any object is accepted as msg, and it will try to make JSON
+   * string out of it. If the first agument is an instance of Error,
+   * it will try to create error construct.
+   *
+   * @param ...msg - Any message
+   */
   static warn(...msg: Array<any>): void {
     Logger.write('warn', msg);
   }
+
+  /**
+   * console.log() compatible, but decorated with Trace ID and
+   * Serverity of ERROR.
+   *
+   * Any object is accepted as msg, and it will try to make JSON
+   * string out of it. If the first agument is an instance of Error,
+   * it will try to create error construct.
+   *
+   * @param ...msg - Any message
+   */
   static error(...msg: Array<any>): void {
     Logger.write('error', msg);
   }
+
+  /**
+   * Convert an error instance to JSON Error construct
+   *
+   * @param err - Capturing Error instance
+   * @param extra - Object that you want to add to the JSON Error
+   *                construct
+   */
 
   static convertErrorToJson(err: Error, extra?: ExtraProperty): LoggingError {
     const myStack = err.stack ? err.stack : '';
@@ -97,8 +287,20 @@ export default class Logger {
     return result;
   }
 
-  // PRIVATE
-  // =======
+  // PRIVATE methods
+  // ===============
+
+  private static updateFormatter() {
+    Logger.formatter = new LogFormatter(Logger._tracer, {
+      env: Logger._env,
+      service: Logger._service,
+      version: Logger._version,
+      progname: Logger._progname,
+      logTemplate: Logger._logTemplate,
+      traceTemplate: Logger._traceTemplate,
+      dateFunc: Logger._dateFunc,
+    });
+  }
 
   private static write(sev: LoggerSeverityString, msg: Array<any>) {
     const messageSevIndex = LoggerSeverityIndex[sev];

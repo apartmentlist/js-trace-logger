@@ -11,7 +11,11 @@ const TEST_VRS = '0x00001';
 describe('Logger', () => {
   before(() => {
     const tracer = stubTracerWithoutContext();
-    Logger.boot(tracer, TEST_ENV, TEST_SRV, TEST_VRS);
+    Logger.boot(tracer, {
+      env: TEST_ENV,
+      service: TEST_SRV,
+      version: TEST_VRS,
+    });
   });
 
   let originalLoggerLevel;
@@ -80,7 +84,7 @@ describe('Logger', () => {
       Logger.passThru = true;
     });
 
-    it('pass through message directly to console', () => {
+    it('passes through message directly to console', () => {
       Logger.level = 'debug';
       const output = inspectStdOutSync(() => {
         Logger.debug('hi');
