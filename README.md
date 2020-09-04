@@ -69,15 +69,15 @@ If you wanna do something different:
 
 ```JavaScript
 const loggerOption = {
-	env: 'production',
-	service: 'my-service',
-	version: '0001',
-	progname: 'my-app',
-	logTemplate: '{"datetime": "${datetime}", "progname": "${progname}", "serverity": "${severity}", "dd": ${trace}, "message": ${msg}}',
-	traceTemplate: '{"env": "${env}", "service": "${service}", "version": "${version}", "trace_id": ${trace_id}, "span_id": ${span_id}}'
-	dateFunc: (d) => {
-		return d.toISOString();
-	}
+  env: 'production',
+  service: 'my-service',
+  version: '0001',
+  progname: 'my-app',
+  logTemplate: '{"datetime": "${datetime}", "progname": "${progname}", "serverity": "${severity}", "dd": ${trace}, "message": ${msg}}',
+  traceTemplate: '{"env": "${env}", "service": "${service}", "version": "${version}", "trace_id": ${trace_id}, "span_id": ${span_id}}'
+  dateFunc: (d) => {
+    return d.toISOString();
+  }
 };
 Logger.boot(tracer, loggerOption);
 Logger.info(JSON.stringify('hello world"));

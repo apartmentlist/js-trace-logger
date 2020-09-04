@@ -16,8 +16,9 @@
     "build:cjs": "tsc --project tsconfig.cjs.json",
     "build:es2015": "tsc --project tsconfig.esm2015.json",
     "build:types": "tsc --project tsconfig.types.json",
-    "lint": "npx eslint src/**",
-    "test": "CHOMA_SEED=$(date +%s) TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\"}' mocha --require ts-node/register --require choma 'test/**/*.test.ts'"
+    "lint": "eslint src/**",
+    "test": "CHOMA_SEED=$(date +%s) TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\"}' mocha --require ts-node/register --require choma 'test/**/*.test.ts'",
+    "docs": "typedoc --out docs src"
   },
   "dependencies": {
     "@types/stack-utils": "^1.0.1",
@@ -40,6 +41,7 @@
     "opentracing": "^0.14.4",
     "ts-node": "^8.10.2",
     "tsunit.external": "^2.1.1",
+    "typedoc": "^0.19.0",
     "typescript": "^4.0.2"
   },
   "publishConfig": {
