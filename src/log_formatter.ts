@@ -1,4 +1,4 @@
-import { Tracer, Span, SpanContext } from 'dd-trace';
+import { tracer, Tracer, Span, SpanContext } from 'dd-trace';
 import { TemplateParam, compileTemplate } from './util';
 import { LoggerSeverity, LoggerSeverityString } from './constant';
 
@@ -13,7 +13,6 @@ interface LogFormatterOption {
 }
 
 export default class LogFormatter {
-  private tracer: Tracer;
   private env;
   private service;
   private version;
@@ -21,9 +20,9 @@ export default class LogFormatter {
   private logFunc: (passed: TemplateParam) => string;
   private traceFunc: (passed: TemplateParam) => string;
   private dateFunc: (d: Date) => string;
+  private tracer: Tracer;
 
-  constructor(tracer: Tracer, option: LogFormatterOption) {
-    this.tracer = tracer;
+  constructor(option: LogFormatterOption, passed_tracer?: Tracer) {
     const { env, service, version, progname, logTemplate, traceTemplate, dateFunc } = option;
     this.env = env;
     this.service = service;
@@ -32,6 +31,7 @@ export default class LogFormatter {
     this.logFunc = compileTemplate(logTemplate);
     this.traceFunc = compileTemplate(traceTemplate);
     this.dateFunc = dateFunc;
+    this.tracer = passed_tracer || tracer;
   }
 
   public format(dt: Date, sev: LoggerSeverityString, msg: string): string {

@@ -18,16 +18,18 @@ describe('LogFormatter', () => {
     const tid = '1234567890';
     const sid = '0987654321';
     const stubTracer = stubTracerWithContext(tid, sid);
-
-    const formatter = new LogFormatter(stubTracer, {
-      env: defaultEnv,
-      service: defaultService,
-      version: defaultVersion,
-      progname: defaultProgname,
-      logTemplate: defaultLogTemplate,
-      traceTemplate: defaultTraceTemplate,
-      dateFunc: defaultDateFunc,
-    });
+    const formatter = new LogFormatter(
+      {
+        env: defaultEnv,
+        service: defaultService,
+        version: defaultVersion,
+        progname: defaultProgname,
+        logTemplate: defaultLogTemplate,
+        traceTemplate: defaultTraceTemplate,
+        dateFunc: defaultDateFunc,
+      },
+      stubTracer
+    );
 
     const dt = new Date(0);
     const msg = 'hello world';
@@ -41,15 +43,18 @@ describe('LogFormatter', () => {
 
   it('formats withount a context', () => {
     const stubTracer = stubTracerWithoutContext();
-    const formatter = new LogFormatter(stubTracer, {
-      env: defaultEnv,
-      service: defaultService,
-      version: defaultVersion,
-      progname: defaultProgname,
-      logTemplate: defaultLogTemplate,
-      traceTemplate: defaultTraceTemplate,
-      dateFunc: defaultDateFunc,
-    });
+    const formatter = new LogFormatter(
+      {
+        env: defaultEnv,
+        service: defaultService,
+        version: defaultVersion,
+        progname: defaultProgname,
+        logTemplate: defaultLogTemplate,
+        traceTemplate: defaultTraceTemplate,
+        dateFunc: defaultDateFunc,
+      },
+      stubTracer
+    );
 
     const dt = new Date(0);
     const msg = 'hello world';
@@ -76,7 +81,7 @@ describe('LogFormatter', () => {
         return d.toISOString();
       },
     };
-    const formatter = new LogFormatter(tracer, loggerOption);
+    const formatter = new LogFormatter(loggerOption, tracer);
     const dt = new Date(0);
     const msg = '"hello world"';
     Object.keys(LoggerSeverity).forEach((key: LoggerSeverityString) => {

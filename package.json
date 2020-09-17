@@ -1,9 +1,9 @@
 {
   "name": "@apartmentlist/js-trace-logger",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Logger outputs messages with Trace ID",
   "author": "Takashi Mizohata <tmizohata@apartmentlist.com>",
-  "license": "Fair",
+  "license": "MIT",
   "main": "dist/cjs/logger",
   "es2015": "dist/esm2015/logger.js",
   "typings": "types/logger.d.ts",
@@ -21,13 +21,13 @@
     "docs": "typedoc --out docs src"
   },
   "dependencies": {
-    "@types/stack-utils": "^1.0.1",
     "dd-trace": "^0.24.2",
     "stack-utils": "^2.0.2"
   },
   "devDependencies": {
     "@types/mocha": "^8.0.3",
     "@types/node": "^14.6.4",
+    "@types/stack-utils": "^1.0.1",
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.1",
     "choma": "^1.2.1",

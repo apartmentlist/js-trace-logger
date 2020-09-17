@@ -6,16 +6,19 @@ import Logger from '../src/logger';
 
 const TEST_ENV = 'testing';
 const TEST_SRV = 'logger';
-const TEST_VRS = '0x00001';
+const TEST_VRS = 'logger-0123456';
 
 describe('Logger', () => {
   before(() => {
     const tracer = stubTracerWithoutContext();
-    Logger.boot(tracer, {
-      env: TEST_ENV,
-      service: TEST_SRV,
-      version: TEST_VRS,
-    });
+    Logger.configure(
+      {
+        env: TEST_ENV,
+        service: TEST_SRV,
+        version: TEST_VRS,
+      },
+      tracer
+    );
   });
 
   let originalLoggerLevel;
@@ -75,7 +78,7 @@ describe('Logger', () => {
       assert.strictEqual(errJson.foo, 'foo');
       assert.strictEqual(errJson.bar, 1234);
       assert.strictEqual(errJson.baz, true);
-      assert.deepEqual(errJson.qux, [1, 2, 3]);
+      assert.deepStrictEqual(errJson.qux, [1, 2, 3]);
     });
   });
 
@@ -92,7 +95,7 @@ describe('Logger', () => {
         Logger.warn('is');
         Logger.error('fine');
       });
-      assert.deepEqual(output, ['[debug] hi\n', '[info] this\n', '[warn] is\n', '[error] fine\n']);
+      assert.deepStrictEqual(output, ['[debug] hi\n', '[info] this\n', '[warn] is\n', '[error] fine\n']);
     });
 
     after(() => {
@@ -246,7 +249,7 @@ describe('Logger', () => {
           };
           const primitiveResult = (<any>Logger)['handleMessage'](primitive);
           delete (<any>Number.prototype).toJSON;
-          assert.deepEqual(primitiveResult, { value: 2, type: 'Number' });
+          assert.deepStrictEqual(primitiveResult, { value: 2, type: 'Number' });
         });
         it('2) primitive translation (see "handles primitive data types")');
         it('3) JSON.stringify()', () => {
@@ -266,7 +269,7 @@ describe('Logger', () => {
         const args = [1, 'hello', true, ['foo'], { bar: 'baz' }];
 
         const result = (<any>Logger)['handleMessage'](args);
-        assert.deepEqual(result, JSON.stringify(args));
+        assert.deepStrictEqual(result, JSON.stringify(args));
       });
     });
 
@@ -295,31 +298,9 @@ describe('Logger', () => {
         assert.strictEqual(result.error.class, 'RangeError');
         assert.strictEqual(result.error.message, 'Extra2');
         assert.ok(Array.isArray(result.error.stacktrace));
-        assert.deepEqual(result[0], { foo: 'foo' });
-        assert.deepEqual(result[1], { bar: 'bar' });
+        assert.deepStrictEqual(result[0], { foo: 'foo' });
+        assert.deepStrictEqual(result[1], { bar: 'bar' });
       });
-    });
-  });
-
-  describe('_processQueuedMessages', () => {
-    it('processes queued messages', () => {
-      (<any>Logger)['logQueue'].push({
-        datetime: new Date(0),
-        severity: 'debug',
-        msg: 'debug0',
-      });
-      (<any>Logger)['logQueue'].push({
-        datetime: new Date(1000),
-        severity: 'debug',
-        msg: 'debug1',
-      });
-      const output = inspectStdOutSync(() => {
-        (<any>Logger)['processQueuedMessages']();
-      });
-      assert.deepEqual(output, [
-        `[1970-01-01 00:00:00 +0000][${TEST_SRV}][DEBUG][dd.env=${TEST_ENV} dd.service=${TEST_SRV} dd.version=${TEST_VRS} dd.trace_id=1 dd.span_id=1] debug0\n`,
-        `[1970-01-01 00:00:01 +0000][${TEST_SRV}][DEBUG][dd.env=${TEST_ENV} dd.service=${TEST_SRV} dd.version=${TEST_VRS} dd.trace_id=1 dd.span_id=1] debug1\n`,
-      ]);
     });
   });
 
@@ -332,7 +313,7 @@ describe('Logger', () => {
         (<any>Logger)['concreteWrite'](d, 'warn', 'warn');
         (<any>Logger)['concreteWrite'](d, 'error', 'error');
       });
-      assert.deepEqual(output, [
+      assert.deepStrictEqual(output, [
         `[1970-01-01 00:00:00 +0000][${TEST_SRV}][DEBUG][dd.env=${TEST_ENV} dd.service=${TEST_SRV} dd.version=${TEST_VRS} dd.trace_id=1 dd.span_id=1] debug\n`,
         `[1970-01-01 00:00:00 +0000][${TEST_SRV}][INFO][dd.env=${TEST_ENV} dd.service=${TEST_SRV} dd.version=${TEST_VRS} dd.trace_id=1 dd.span_id=1] info\n`,
         `[1970-01-01 00:00:00 +0000][${TEST_SRV}][WARN][dd.env=${TEST_ENV} dd.service=${TEST_SRV} dd.version=${TEST_VRS} dd.trace_id=1 dd.span_id=1] warn\n`,

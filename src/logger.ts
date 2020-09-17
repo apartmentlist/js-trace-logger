@@ -4,21 +4,13 @@ import LogFormatter from './log_formatter';
 import { LoggerSeverityString, LoggerSeverityRuntimeOption, LoggerSeverityIndex } from './constant';
 import { formatUTCDateRuby } from './util';
 
-interface LogQueue {
-  datetime: Date;
-  severity: LoggerSeverityString;
-  msg: any;
-}
-
-interface LoggingError {
-  error: ErrorObject;
+interface ErrorLogConstruct {
+  error: {
+    class: string;
+    message: string;
+    stacktrace: Array<string>;
+  };
   [key: string]: any;
-}
-
-interface ErrorObject {
-  class: string;
-  message: string;
-  stacktrace: Array<string>;
 }
 
 interface ExtraProperty {
@@ -39,32 +31,33 @@ const LoggerDefaultSeverity: LoggerSeverityString = 'info';
 
 export default class Logger {
   /**
-   * Skip TraceID decoration, if it's true
+   * It skips TraceID decoration if it's true (Default false)
    */
   public static passThru = false;
 
-  // See GETTER / SETTER section for underscore private properties
+  // See GETTER section for underscore private properties
   private static _dateFunc: (d: Date) => string = formatUTCDateRuby;
   private static _env = 'development';
   private static _level: LoggerSeverityString = LoggerDefaultSeverity;
   private static _logTemplate = '[${datetime}][${progname}][${severity}][${trace}] ${msg}';
   private static _progname = 'logger';
   private static _service = 'logger';
-  private static _tracer: Tracer;
   private static _traceTemplate =
     'dd.env=${env} dd.service=${service} dd.version=${version} dd.trace_id=${trace_id} dd.span_id=${span_id}';
   private static _version = 'unknown';
 
   private static formatter: LogFormatter;
-  private static logQueue: Array<LogQueue> = [];
   private static severityIndex: number = LoggerSeverityIndex[LoggerDefaultSeverity];
   private static stackUtil: StackUtils = new StackUtils({
     cwd: process.cwd(),
     internals: StackUtils.nodeInternals(),
   });
 
-  // GETTER / SETTER
-  // ===============
+  /**
+   * Followings are getter functions for private properties. I don't
+   * really find a good reason to switch these values EXCEPT log
+   * level in runtime, so I removed setter functions
+   */
 
   /**
    * function to generate a string out of Date object
@@ -72,20 +65,12 @@ export default class Logger {
   static get dateFunc(): (d: Date) => string {
     return Logger._dateFunc;
   }
-  static set dateFunc(func: (d: Date) => string) {
-    Logger._dateFunc = func;
-    Logger.updateFormatter();
-  }
 
   /**
    * DD_ENV
    */
   static get env(): string {
     return Logger._env;
-  }
-  static set env(str: string) {
-    Logger._env = str;
-    Logger.updateFormatter();
   }
 
   /**
@@ -114,20 +99,12 @@ export default class Logger {
   static get logTemplate(): string {
     return Logger._logTemplate;
   }
-  static set logTemplate(str: string) {
-    Logger._logTemplate = str;
-    Logger.updateFormatter();
-  }
 
   /**
    * progname ~= DD_SERVICE; unless you set it specifically
    */
   static get progname(): string {
     return Logger._progname;
-  }
-  static set progname(str: string) {
-    Logger._progname = str;
-    Logger.updateFormatter();
   }
 
   /**
@@ -136,31 +113,12 @@ export default class Logger {
   static get service(): string {
     return Logger._service;
   }
-  static set service(str: string) {
-    Logger._service = str;
-    Logger.updateFormatter();
-  }
-
-  /**
-   * Curently only Datadog Tracer
-   */
-  static get tracer(): Tracer {
-    return Logger._tracer;
-  }
-  static set tracer(tracer: Tracer) {
-    Logger._tracer = tracer;
-    Logger.updateFormatter();
-  }
 
   /**
    * template to generate dd_trace string
    */
   static get traceTemplate(): string {
     return Logger._traceTemplate;
-  }
-  static set traceTemplate(str: string) {
-    Logger._traceTemplate = str;
-    Logger.updateFormatter();
   }
 
   /**
@@ -169,22 +127,11 @@ export default class Logger {
   static get version(): string {
     return Logger._version;
   }
-  static set version(str: string) {
-    Logger._version = str;
-    Logger.updateFormatter();
-  }
 
   // PUBLIC methods
   // ==============
 
-  /**
-   * Start to output log after boot()
-   */
-  static boot(tracer: Tracer, option: LoggerOption): void {
-    // `Logger.info()` and other methods should still work
-    // before `boot()` but it'll start to really writ after
-    // DDTrace.Tracer gets properly initilized.
-    Logger._tracer = tracer;
+  static configure(option: LoggerOption, tracer?: Tracer): void {
     const { env, service, version, progname, logTemplate, traceTemplate, dateFunc } = option;
     Logger._env = env;
     Logger._service = service;
@@ -199,8 +146,18 @@ export default class Logger {
     if (dateFunc) {
       Logger._dateFunc = dateFunc;
     }
-    Logger.updateFormatter();
-    Logger.processQueuedMessages();
+    Logger.formatter = new LogFormatter(
+      {
+        env: Logger._env,
+        service: Logger._service,
+        version: Logger._version,
+        progname: Logger._progname,
+        logTemplate: Logger._logTemplate,
+        traceTemplate: Logger._traceTemplate,
+        dateFunc: Logger._dateFunc,
+      },
+      tracer
+    );
   }
 
   /**
@@ -267,9 +224,9 @@ export default class Logger {
    *                construct
    */
 
-  static convertErrorToJson(err: Error, extra?: ExtraProperty): LoggingError {
+  static convertErrorToJson(err: Error, extra?: ExtraProperty): ErrorLogConstruct {
     const myStack = err.stack ? err.stack : '';
-    const result: LoggingError = {
+    const result: ErrorLogConstruct = {
       error: {
         class: err.constructor.name,
         message: err.message,
@@ -290,41 +247,23 @@ export default class Logger {
   // PRIVATE methods
   // ===============
 
-  private static updateFormatter() {
-    Logger.formatter = new LogFormatter(Logger._tracer, {
-      env: Logger._env,
-      service: Logger._service,
-      version: Logger._version,
-      progname: Logger._progname,
-      logTemplate: Logger._logTemplate,
-      traceTemplate: Logger._traceTemplate,
-      dateFunc: Logger._dateFunc,
-    });
-  }
-
   private static write(sev: LoggerSeverityString, msg: Array<any>) {
     const messageSevIndex = LoggerSeverityIndex[sev];
     if (Logger.severityIndex < messageSevIndex) {
       return;
     }
     if (Logger.passThru) {
-      const arg: Array<any> = [`[${sev}]`].concat(msg);
-      console.log.call(console, ...arg);
+      Logger.passThruWrite(sev, msg);
+      return;
+    }
+    if (!Logger.formatter) {
+      Logger.passThruWrite(sev, msg);
       return;
     }
 
     const dt: Date = new Date();
     const m: string = Logger.handleMessage(msg);
-
-    if (Logger.formatter) {
-      Logger.concreteWrite(dt, sev, m);
-    } else {
-      Logger.logQueue.push({
-        datetime: dt,
-        severity: sev,
-        msg: msg,
-      });
-    }
+    Logger.concreteWrite(dt, sev, m);
   }
 
   private static handleMessage(_msg: Array<any> | null): string {
@@ -396,17 +335,14 @@ export default class Logger {
     return '(could not be processed by Logger::handleMessage())';
   }
 
-  private static processQueuedMessages(): void {
-    Logger.logQueue.forEach((q: LogQueue) => {
-      Logger.concreteWrite(q.datetime, q.severity, q.msg);
-    });
-    Logger.logQueue = [];
-  }
-
   private static concreteWrite(dt: Date, sev: LoggerSeverityString, msg: string) {
-    // if you ever need to write it to a FD,
-    // consider using this:
+    // if you ever need to write it to a FD, consider this:
     // https://www.npmjs.com/package/sonic-boom
     console.log(Logger.formatter.format(dt, sev, msg));
+  }
+
+  private static passThruWrite(sev: LoggerSeverityString, msg: Array<any>) {
+    const args = [`[${sev}]`].concat(msg);
+    console.log.call(console, ...args);
   }
 }

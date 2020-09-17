@@ -22,7 +22,7 @@ const version = prcesss.env.DD_VERSION || 'dev';
 if (process.env.DD_API_KEY) {
   tracer.init({ env, service, version });
 }
-Logger.boot(tracer, { env, service, version });
+Logger.configure(tracer, { env, service, version });
 
 // this is optional: If you don't need the decoration in
 // non-production environments.
@@ -79,7 +79,7 @@ const loggerOption = {
     return d.toISOString();
   }
 };
-Logger.boot(tracer, loggerOption);
+Logger.configure(tracer, loggerOption);
 Logger.info(JSON.stringify('hello world"));
   // => {"datetime": "1970-01-01T00:00:00.000Z", "progname": "my-app", "serverity": "INFO", "dd": {"env": "production", "service": "my-service", "version": "0001", "trace_id": "1", "span_id": "1"}, "message": "hello world"}
 ```
