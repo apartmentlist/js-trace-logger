@@ -10,7 +10,6 @@ interface LogFormatterOption {
     dateFunc: (d: Date) => string;
 }
 export default class LogFormatter {
-    private tracer;
     private env;
     private service;
     private version;
@@ -18,7 +17,8 @@ export default class LogFormatter {
     private logFunc;
     private traceFunc;
     private dateFunc;
-    constructor(tracer: Tracer, option: LogFormatterOption);
+    private tracer;
+    constructor(option: LogFormatterOption, passed_tracer?: Tracer);
     format(dt: Date, sev: LoggerSeverityString, msg: string): string;
     private toTraceString;
 }

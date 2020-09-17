@@ -1,13 +1,12 @@
 import { Tracer } from 'dd-trace';
 import { LoggerSeverityString } from './constant';
-interface LoggingError {
-    error: ErrorObject;
+interface ErrorLogConstruct {
+    error: {
+        class: string;
+        message: string;
+        stacktrace: Array<string>;
+    };
     [key: string]: any;
-}
-interface ErrorObject {
-    class: string;
-    message: string;
-    stacktrace: Array<string>;
 }
 interface ExtraProperty {
     [key: string]: any;
@@ -23,7 +22,7 @@ interface LoggerOption {
 }
 export default class Logger {
     /**
-     * Skip TraceID decoration, if it's true
+     * It skips TraceID decoration if it's true (Default false)
      */
     static passThru: boolean;
     private static _dateFunc;
@@ -32,23 +31,24 @@ export default class Logger {
     private static _logTemplate;
     private static _progname;
     private static _service;
-    private static _tracer;
     private static _traceTemplate;
     private static _version;
     private static formatter;
-    private static logQueue;
     private static severityIndex;
     private static stackUtil;
+    /**
+     * Followings are getter functions for private properties. I don't
+     * really find a good reason to switch these values EXCEPT log
+     * level in runtime, so I removed setter functions
+     */
     /**
      * function to generate a string out of Date object
      */
     static get dateFunc(): (d: Date) => string;
-    static set dateFunc(func: (d: Date) => string);
     /**
      * DD_ENV
      */
     static get env(): string;
-    static set env(str: string);
     /**
      * LOG_LEVEL
      */
@@ -58,36 +58,23 @@ export default class Logger {
      * template to generate a whole log line
      */
     static get logTemplate(): string;
-    static set logTemplate(str: string);
     /**
      * progname ~= DD_SERVICE; unless you set it specifically
      */
     static get progname(): string;
-    static set progname(str: string);
     /**
      * DD_SERVICE
      */
     static get service(): string;
-    static set service(str: string);
-    /**
-     * Curently only Datadog Tracer
-     */
-    static get tracer(): Tracer;
-    static set tracer(tracer: Tracer);
     /**
      * template to generate dd_trace string
      */
     static get traceTemplate(): string;
-    static set traceTemplate(str: string);
     /**
      * DD_VERSION
      */
     static get version(): string;
-    static set version(str: string);
-    /**
-     * Start to output log after boot()
-     */
-    static boot(tracer: Tracer, option: LoggerOption): void;
+    static configure(option: LoggerOption, tracer?: Tracer): void;
     /**
      * console.log() compatible, but decorated with Trace ID and
      * Serverity of DEBUG.
@@ -139,11 +126,10 @@ export default class Logger {
      * @param extra - Object that you want to add to the JSON Error
      *                construct
      */
-    static convertErrorToJson(err: Error, extra?: ExtraProperty): LoggingError;
-    private static updateFormatter;
+    static convertErrorToJson(err: Error, extra?: ExtraProperty): ErrorLogConstruct;
     private static write;
     private static handleMessage;
-    private static processQueuedMessages;
     private static concreteWrite;
+    private static passThruWrite;
 }
 export {};
