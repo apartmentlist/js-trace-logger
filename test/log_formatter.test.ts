@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import LogFormatter from '../src/log_formatter';
+import { LogFormatter } from '../src/log_formatter';
 import { formatUTCDateRuby } from '../src/util';
 import { LoggerSeverity, LoggerSeverityString } from '../src/constant';
 import { stubTracerWithContext, stubTracerWithoutContext } from './test_util';

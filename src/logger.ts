@@ -1,6 +1,6 @@
 import { Tracer } from 'dd-trace';
 import StackUtils from 'stack-utils';
-import LogFormatter from './log_formatter';
+import { LogFormatter } from './log_formatter';
 import { LoggerSeverityString, LoggerSeverityRuntimeOption, LoggerSeverityIndex } from './constant';
 import { formatUTCDateRuby } from './util';
 
@@ -17,7 +17,7 @@ interface ExtraProperty {
   [key: string]: any;
 }
 
-interface LoggerOption {
+export interface LoggerOption {
   env: string;
   service: string;
   version: string;
@@ -29,7 +29,9 @@ interface LoggerOption {
 
 const LoggerDefaultSeverity: LoggerSeverityString = 'info';
 
-export default class Logger {
+export { LoggerSeverityString } from './constant';
+export { compileTemplate, extractParams, formatUTCDateRuby } from './util';
+export class Logger {
   /**
    * It skips TraceID decoration if it's true (Default false)
    */
