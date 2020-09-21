@@ -9,7 +9,7 @@ interface LogFormatterOption {
     traceTemplate: string;
     dateFunc: (d: Date) => string;
 }
-export default class LogFormatter {
+export declare class LogFormatter {
     private env;
     private service;
     private version;

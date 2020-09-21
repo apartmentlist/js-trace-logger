@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import { stubTracerWithoutContext, cleanupConsoleEscapeSequence, inspectStdOutSync } from './test_util';
 import { LoggerSeverityIndex } from '../src/constant';
 
-import Logger from '../src/logger';
+import { Logger } from '../src/logger';
 
 const TEST_ENV = 'testing';
 const TEST_SRV = 'logger';

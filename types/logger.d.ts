@@ -11,7 +11,7 @@ interface ErrorLogConstruct {
 interface ExtraProperty {
     [key: string]: any;
 }
-interface LoggerOption {
+export interface LoggerOption {
     env: string;
     service: string;
     version: string;
@@ -20,7 +20,9 @@ interface LoggerOption {
     traceTemplate?: string;
     dateFunc?: (d: Date) => string;
 }
-export default class Logger {
+export { LoggerSeverityString } from './constant';
+export { compileTemplate, extractParams, formatUTCDateRuby } from './util';
+export declare class Logger {
     /**
      * It skips TraceID decoration if it's true (Default false)
      */
@@ -132,4 +134,3 @@ export default class Logger {
     private static concreteWrite;
     private static passThruWrite;
 }
-export {};

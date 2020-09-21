@@ -12,7 +12,7 @@ interface LogFormatterOption {
   dateFunc: (d: Date) => string;
 }
 
-export default class LogFormatter {
+export class LogFormatter {
   private env;
   private service;
   private version;
