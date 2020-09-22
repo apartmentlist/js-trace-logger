@@ -14,7 +14,7 @@ Let's configure it:
 
 ```JavaScript
 import { tracer } from 'dd-trace';
-import Logger from '@apartmentlist/js-trace-logger';
+import { Logger } from '@apartmentlist/js-trace-logger';
 
 const env     = process.env.DD_ENV     || 'development';
 const service = process.env.DD_SERVICE || 'my_app';
