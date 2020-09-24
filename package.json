@@ -1,6 +1,6 @@
 {
   "name": "@apartmentlist/js-trace-logger",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Logger outputs messages with Trace ID",
   "author": "Takashi Mizohata <tmizohata@apartmentlist.com>",
   "license": "MIT",
@@ -8,8 +8,8 @@
   "es2015": "dist/esm2015/logger.js",
   "typings": "types/logger.d.ts",
   "scripts": {
-    "deploy": "npm run lint && npm run test && npm run build && npm publish --access restricted",
-    "deploy:dry-run": "npm publish --access restricted --dry-run",
+    "deploy": "npm run lint && npm run test && npm run build && npm publish --access public",
+    "deploy:dry-run": "npm publish --access public --dry-run",
     "build": "npm run build:clean && npm run build:all",
     "build:clean": "rm -rf dist && mkdir dist",
     "build:all": "npm run build:cjs && npm run build:es2015 && npm run build:types",
@@ -44,7 +44,11 @@
     "typedoc": "^0.19.0",
     "typescript": "^4.0.2"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@apartmentlist"
-  }
+  "keywords": [
+    "datadog",
+    "trace",
+    "console",
+    "APM",
+    "logging"
+  ]
 }
