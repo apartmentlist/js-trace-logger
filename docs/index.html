@@ -79,7 +79,7 @@
 
 <span class="hljs-keyword">const</span> env     = process.env.DD_ENV     || <span class="hljs-string">&#x27;development&#x27;</span>;
 <span class="hljs-keyword">const</span> service = process.env.DD_SERVICE || <span class="hljs-string">&#x27;my_app&#x27;</span>;
-<span class="hljs-keyword">const</span> version = prcesss.env.DD_VERSION || <span class="hljs-string">&#x27;dev&#x27;</span>;
+<span class="hljs-keyword">const</span> version = process.env.DD_VERSION || <span class="hljs-string">&#x27;dev&#x27;</span>;
 <span class="hljs-keyword">if</span> (process.env.DD_API_KEY) {
   tracer.init({ env, service, version });
 }
@@ -129,7 +129,7 @@ Logger.error(err);
   <span class="hljs-attr">version</span>: <span class="hljs-string">&#x27;0001&#x27;</span>,
   <span class="hljs-attr">progname</span>: <span class="hljs-string">&#x27;my-app&#x27;</span>,
   <span class="hljs-attr">logTemplate</span>: <span class="hljs-string">&#x27;{&quot;datetime&quot;: &quot;${datetime}&quot;, &quot;progname&quot;: &quot;${progname}&quot;, &quot;serverity&quot;: &quot;${severity}&quot;, &quot;dd&quot;: ${trace}, &quot;message&quot;: ${msg}}&#x27;</span>,
-  <span class="hljs-attr">traceTemplate</span>: <span class="hljs-string">&#x27;{&quot;env&quot;: &quot;${env}&quot;, &quot;service&quot;: &quot;${service}&quot;, &quot;version&quot;: &quot;${version}&quot;, &quot;trace_id&quot;: ${trace_id}, &quot;span_id&quot;: ${span_id}}&#x27;</span>
+  <span class="hljs-attr">traceTemplate</span>: <span class="hljs-string">&#x27;{&quot;env&quot;: &quot;${env}&quot;, &quot;service&quot;: &quot;${service}&quot;, &quot;version&quot;: &quot;${version}&quot;, &quot;trace_id&quot;: ${trace_id}, &quot;span_id&quot;: ${span_id}}&#x27;</span>,
   <span class="hljs-attr">dateFunc</span>: <span class="hljs-function">(<span class="hljs-params">d</span>) =&gt;</span> {
     <span class="hljs-keyword">return</span> d.toISOString();
   }

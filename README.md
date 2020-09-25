@@ -18,7 +18,7 @@ import { Logger } from '@apartmentlist/js-trace-logger';
 
 const env     = process.env.DD_ENV     || 'development';
 const service = process.env.DD_SERVICE || 'my_app';
-const version = prcesss.env.DD_VERSION || 'dev';
+const version = process.env.DD_VERSION || 'dev';
 if (process.env.DD_API_KEY) {
   tracer.init({ env, service, version });
 }
@@ -74,7 +74,7 @@ const loggerOption = {
   version: '0001',
   progname: 'my-app',
   logTemplate: '{"datetime": "${datetime}", "progname": "${progname}", "serverity": "${severity}", "dd": ${trace}, "message": ${msg}}',
-  traceTemplate: '{"env": "${env}", "service": "${service}", "version": "${version}", "trace_id": ${trace_id}, "span_id": ${span_id}}'
+  traceTemplate: '{"env": "${env}", "service": "${service}", "version": "${version}", "trace_id": ${trace_id}, "span_id": ${span_id}}',
   dateFunc: (d) => {
     return d.toISOString();
   }
