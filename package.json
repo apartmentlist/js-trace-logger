@@ -1,6 +1,6 @@
 {
   "name": "@apartmentlist/js-trace-logger",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Logger outputs messages with Trace ID",
   "author": "Takashi Mizohata <tmizohata@apartmentlist.com>",
   "license": "MIT",
@@ -25,27 +25,27 @@
     "docs": "typedoc --out docs --excludePrivate --includeVersion src"
   },
   "dependencies": {
-    "dd-trace": "^0.29.2",
-    "stack-utils": "^2.0.2"
+    "dd-trace": "^1.7.0",
+    "stack-utils": "^2.0.5"
   },
   "devDependencies": {
-    "@types/mocha": "^8.2.0",
+    "@types/mocha": "^9.1.0",
     "@types/node": "^14.14.20",
     "@types/stack-utils": "^2.0.0",
-    "@typescript-eslint/eslint-plugin": "^4.12.0",
-    "@typescript-eslint/parser": "^4.12.0",
+    "@typescript-eslint/eslint-plugin": "^5.12.1",
+    "@typescript-eslint/parser": "^5.12.1",
     "choma": "^1.2.1",
-    "eslint": "^7.17.0",
-    "eslint-config-standard": "^16.0.2",
-    "eslint-plugin-import": "^2.22.1",
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^5.0.0",
-    "mocha": "^8.2.1",
+    "mocha": "^9.2.1",
     "opentracing": "^0.14.5",
     "ts-node": "^9.1.1",
     "tsunit.external": "^3.7.2",
-    "typedoc": "^0.20.12",
+    "typedoc": "^0.22.12",
     "typedoc-plugin-nojekyll": "1.0.1",
     "typescript": "^4.1.3"
   },
