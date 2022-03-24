@@ -1,30 +1,35 @@
+import { instance, mock, when } from 'ts-mockito';
 import { Tracer, Scope, Span, tracer as singleTracerInstance } from 'dd-trace';
 import { FakeFactory } from 'tsunit.external';
-import { SpanContext as SpanContextClass } from 'opentracing';
+import { SpanContext as SpanContextClass, Span as SpanClass } from 'opentracing';
 import * as Util from 'util';
 
 export const stubTracerWithContext = function (tid: string, sid: string): Tracer {
-  const fakeSpan: Span = singleTracerInstance.startSpan('fake');
-  fakeSpan.finish();
-  const context: SpanContextClass = new SpanContextClass();
-  const span: Span = FakeFactory.getFake<Span>(fakeSpan);
+  const mockedContext: SpanContextClass = mock(SpanContextClass);
+  when(mockedContext.toTraceId()).thenCall(() => {
+    return tid;
+  });
+  when(mockedContext.toSpanId()).thenCall(() => {
+    return sid;
+  });
+  const context: SpanContextClass = instance(mockedContext);
+
+  const mockedSpan: Span = mock(SpanClass);
+  when(mockedSpan.context()).thenCall(() => {
+    return context;
+  });
+  const span = instance(mockedSpan);
+
   const scope: Scope = FakeFactory.getFake<Scope>(singleTracerInstance.scope);
+  scope.active = function (): Span {
+    return span;
+  };
+
   const tracer: Tracer = FakeFactory.getFake<Tracer>(singleTracerInstance);
   tracer.scope = function (): Scope {
     return scope;
   };
-  scope.active = function (): Span {
-    return span;
-  };
-  span.context = function (): SpanContextClass {
-    return context;
-  };
-  context.toTraceId = function (): string {
-    return tid;
-  };
-  context.toSpanId = function (): string {
-    return sid;
-  };
+
   return tracer;
 };
 
